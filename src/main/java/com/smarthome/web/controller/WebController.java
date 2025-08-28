@@ -1,12 +1,10 @@
 package com.smarthome.web.controller;
 
-import com.smarthome.mqtt.service.DataCache;
-import com.smarthome.mqtt.service.MqttMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import com.smarthome.web.service.WebService;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -20,7 +18,9 @@ public class WebController {
 
     @GetMapping("/getdata")
     @ResponseBody
-    public String get() {
-        return webService.get();
-    }
+    public String getAll() {return webService.getAll();}
+
+    @GetMapping("/getdata/{deciveid}")
+    @ResponseBody
+    public String getById(@PathVariable String deciveid) {return webService.getById(deciveid);}
 }

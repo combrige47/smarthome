@@ -15,10 +15,17 @@ public class WebService {
     @Autowired // 自动注入 ObjectMapper（来自 JsonConfig 的 Bean）
     private ObjectMapper objectMapper;
 
-    public String get() {
+    public String getAll() {
         try {
-            // 直接使用注入的 dataCache，不要手动 new DataCache()
             return objectMapper.writeValueAsString(dataCache.getAlldata());
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return "{}"; // 异常时返回空 JSON
+        }
+    }
+    public String getById(String device) {
+        try {
+            return objectMapper.writeValueAsString(dataCache.getdata(device));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return "{}"; // 异常时返回空 JSON
