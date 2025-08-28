@@ -1,6 +1,6 @@
-package com.smarthome.mqttdemo.controller;
+package com.smarthome.mqtt.controller;
 
-import com.smarthome.mqttdemo.service.MqttMessageSender;
+import com.smarthome.mqtt.service.MqttMessageSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 
 @Controller
-public class TestController {
+public class MqttController {
 
     @Autowired
     private MqttMessageSender mqttMessageSender;

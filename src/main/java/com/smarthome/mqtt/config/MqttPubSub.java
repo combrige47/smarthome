@@ -1,6 +1,7 @@
-package com.smarthome.mqttdemo.config;
+package com.smarthome.mqtt.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smarthome.mqtt.entity.MqttEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
+import com.smarthome.mqtt.service.DataCache;
 
 @Slf4j
 @Configuration
@@ -51,8 +53,9 @@ public class MqttPubSub {
                     String topic = (String) message.getHeaders().get("mqtt_receivedTopic");
                     String payload = (String) message.getPayload();
                     // 打印原始消息
-                    System.out.println(topic);
-                    System.out.println(payload);
+                    log.info("获取主题"+topic+":"+payload);
+                    MqttEntity mqttEntity = new MqttEntity(topic, payload);
+                    DataCache.updatedata(mqttEntity);
                 })
                 .get();
     }
