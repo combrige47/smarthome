@@ -1,0 +1,79 @@
+package com.smarthome.mqttdemo.config;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.channel.DirectChannel;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
+import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
+import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
+import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+
+@Slf4j
+@Configuration
+public class MqttPubSub {
+
+    @Autowired
+    private MqttPahoClientFactory mqttClientFactory;
+
+
+
+    @Value("${mqtt.topic}")
+    private String topic;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+
+//订阅板子数据的(去连接板子发来的MQTT中的数据：温湿传感器。。。。。。。)
+    @Bean
+    public MqttPahoMessageDrivenChannelAdapter mqttInbound() {
+        MqttPahoMessageDrivenChannelAdapter adapter =
+                new MqttPahoMessageDrivenChannelAdapter("mqtt-printer-" + System.currentTimeMillis()+"-in", mqttClientFactory, topic.split(",")[0]);
+        adapter.setCompletionTimeout(5000);
+        adapter.setConverter(new DefaultPahoMessageConverter());
+        adapter.setQos(1);
+        return adapter;
+    }
+
+//获取topic的数据
+    @Bean
+    public IntegrationFlow mqttInFlow() {
+        return IntegrationFlows.from(mqttInbound())
+                .handle(message -> {
+                    String topic = (String) message.getHeaders().get("mqtt_receivedTopic");
+                    String payload = (String) message.getPayload();
+                    // 打印原始消息
+                    System.out.println(topic);
+                    System.out.println(payload);
+                })
+                .get();
+    }
+
+
+
+    @Bean
+    public MessageChannel mqttOutboundChannel() {
+        return new DirectChannel();
+    }
+
+
+//    给板子发送数据
+    @Bean
+    @ServiceActivator(inputChannel = "mqttOutboundChannel")
+    public MessageHandler mqttOutbound() {
+        MqttPahoMessageHandler messageHandler =
+                new MqttPahoMessageHandler("mqtt-printer-" + System.currentTimeMillis() + "-out", mqttClientFactory);
+        messageHandler.setAsync(true);
+        messageHandler.setDefaultTopic(topic.split(",")[1]);
+        return messageHandler;
+    }
+
+}
