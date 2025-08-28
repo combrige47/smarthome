@@ -38,7 +38,7 @@ public class MqttPubSub {
     @Bean
     public MqttPahoMessageDrivenChannelAdapter mqttInbound() {
         MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter("mqtt-printer-" + System.currentTimeMillis()+"-in", mqttClientFactory, topic.split(",")[0]);
+                new MqttPahoMessageDrivenChannelAdapter("mqtt-printer-" + System.currentTimeMillis()+"-in", mqttClientFactory, topic.split(","));
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1);

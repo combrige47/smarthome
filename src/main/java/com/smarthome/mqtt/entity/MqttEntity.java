@@ -1,20 +1,19 @@
 package com.smarthome.mqtt.entity;
 
+import com.smarthome.util.TimeUtils;
 import lombok.Data;
 
-@Data //  lombok 注解，自动生成 getter/setter
+@Data
 public class MqttEntity {
-    private String test;    //测试传输
-    private String deviceId; // 设备唯一标识
-    private String type; // 设备类型（如 temperature、humidity、light）
-    private Double value; // 数值（如温度值、湿度值）
-    private Long timestamp; // 上报时间戳
+    private String deviceId; //设备id
+    private Double value;   //值
+    private Long timestamp; // 时间戳
+    private String timestampString;
 
     public MqttEntity(String topic, String payload) {
-        this.test = topic;
         this.deviceId = topic;
-        this.type = topic;
         this.value = Double.parseDouble(payload);
         this.timestamp = System.currentTimeMillis();
+        this.timestampString = TimeUtils.formatTimestamp(this.timestamp);
     }
 }

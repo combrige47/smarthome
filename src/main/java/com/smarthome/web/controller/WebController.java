@@ -18,7 +18,7 @@ public class WebController {
         this.webService = webService;
     }
 
-    @GetMapping("/get")
+    @GetMapping("/getdata")
     @ResponseBody
     public String get() {
         return webService.get();
