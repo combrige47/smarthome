@@ -19,6 +19,12 @@ public class MqttDataController {
     @Autowired
     private MqttDataService mqttDataService;
 
+    @GetMapping("/")
+    @ResponseBody
+    public List<MqttDataEntity> findAll() {
+        return mqttDataService.findAll();
+    }
+
     @GetMapping("/{deciveId}")
     @ResponseBody
     public List<MqttDataEntity> FindHistoryById(@PathVariable String deciveId) {
