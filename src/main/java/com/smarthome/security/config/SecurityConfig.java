@@ -50,7 +50,7 @@ public class SecurityConfig {
                 )
                 .formLogin(form -> form
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/info", true)
+                        .defaultSuccessUrl("/getdata", true)
                         .permitAll()
                 )
                 .rememberMe(remember -> remember
@@ -58,6 +58,10 @@ public class SecurityConfig {
                         .tokenValiditySeconds(60 * 60 * 24 * 7)
                         .userDetailsService(userDetailsService)
                 )
+                .formLogin()
+                .loginPage("/login")  // 这里指定注册页面作为默认跳转页
+                .permitAll()
+                .and()
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")

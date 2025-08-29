@@ -16,6 +16,15 @@ public class WebController {
         this.webService = webService;
     }
 
+    @GetMapping("/register")
+    public String showRegisterPage() {
+        return "register";
+    }
+    @GetMapping("/login")
+    public String showLoginPage() {
+        return "login";
+    }
+
     @GetMapping("/getdata")
     @ResponseBody
     public String getAll() {return webService.getAll();}
