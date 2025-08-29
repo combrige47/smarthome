@@ -1,5 +1,6 @@
 package com.smarthome.user.controller;
 
+import com.smarthome.tools.result.Result;
 import com.smarthome.user.entity.UserEntity;
 import com.smarthome.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,13 @@ public class    UserController {
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<Result<String>> login(
+            @RequestParam("username") String username,
+            @RequestParam("password") String password) {
+            return userService.login(username, password);
     }
 
     @PostMapping("/register")

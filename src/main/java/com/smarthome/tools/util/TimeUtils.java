@@ -1,4 +1,4 @@
-package com.smarthome.util;
+package com.smarthome.tools.util;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

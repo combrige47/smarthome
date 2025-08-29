@@ -7,6 +7,7 @@ import com.smarthome.web.service.WebService;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+
 @Controller
 public class WebController {
 
@@ -14,15 +15,6 @@ public class WebController {
     @Autowired
     public WebController(WebService webService) {
         this.webService = webService;
-    }
-
-    @GetMapping("/register")
-    public String showRegisterPage() {
-        return "register";
-    }
-    @GetMapping("/login")
-    public String showLoginPage() {
-        return "login";
     }
 
     @GetMapping("/getdata")

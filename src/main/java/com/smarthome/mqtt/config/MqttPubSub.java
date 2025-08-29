@@ -25,8 +25,6 @@ import com.smarthome.mqtt.service.DataCache;
 public class MqttPubSub {
 
     private final MqttPahoClientFactory mqttClientFactory;
-
-
     @Value("${mqtt.topic}")
     private String topic;
     @Autowired
