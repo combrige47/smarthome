@@ -1,7 +1,9 @@
 package com.smarthome.mqtt.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smarthome.mqtt.entity.MqttDataEntity;
 import com.smarthome.mqtt.entity.MqttEntity;
+import com.smarthome.mqtt.service.MqttDataService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,7 +49,7 @@ public class MqttPubSub {
 
 //获取topic的数据
     @Bean
-    public IntegrationFlow mqttInFlow() {
+    public IntegrationFlow mqttInFlow(MqttDataService mqttDataService) {
         return IntegrationFlows.from(mqttInbound())
                 .handle(message -> {
                     String topic = (String) message.getHeaders().get("mqtt_receivedTopic");
@@ -56,6 +58,14 @@ public class MqttPubSub {
                     log.info("获取主题"+topic+":"+payload);
                     MqttEntity mqttEntity = new MqttEntity(topic, payload);
                     DataCache.updatedata(mqttEntity);
+
+                    MqttDataEntity mqttDataEntity = new MqttDataEntity(mqttEntity);
+                    try{
+                        mqttDataService.save(mqttDataEntity);
+                        log.info("数据已保存到数据库");
+                    }catch (Exception e){
+                        log.error(e.getMessage());
+                    }
                 })
                 .get();
     }
