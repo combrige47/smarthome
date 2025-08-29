@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class WebController {
-    @Autowired
-    private final WebService webService;
 
+    private final WebService webService;
+    @Autowired
     public WebController(WebService webService) {
         this.webService = webService;
     }

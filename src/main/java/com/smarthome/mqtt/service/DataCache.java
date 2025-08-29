@@ -1,4 +1,3 @@
-// com/smarthome/mqttdemo/service/MqttEntityCache.java
 package com.smarthome.mqtt.service;
 
 import com.smarthome.mqtt.entity.MqttEntity;

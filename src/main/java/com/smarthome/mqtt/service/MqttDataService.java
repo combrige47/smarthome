@@ -13,10 +13,14 @@ import java.util.List;
 @Slf4j
 @Service
 public class MqttDataService {
-    @Autowired
-    private MqttDataRepository mqttDataRepository;
 
-    private static final long SAVE_INTERVAL = 1 * 1000 * 1000;
+    private final MqttDataRepository mqttDataRepository;
+
+    @Autowired
+    public MqttDataService(MqttDataRepository mqttDataRepository) {
+        this.mqttDataRepository = mqttDataRepository;
+    }
+    private static final long SAVE_INTERVAL = 1000 * 1000 * 100;
 
     @Transactional
     public MqttDataEntity save(MqttEntity mqttEntity) {
@@ -42,14 +46,17 @@ public class MqttDataService {
     public void save(MqttDataEntity mqttDataEntity) {
         String deviceId = mqttDataEntity.getDeviceId();
         Long currentTime = System.currentTimeMillis(); // 当前时间戳
-        Long lastSaveTime =mqttDataRepository.findTopByDeviceId(deviceId).getTimestamp();
+        Long lastSaveTime = 0L;
+        if(mqttDataRepository.findTopByDeviceId(deviceId) != null){
+            lastSaveTime = mqttDataEntity.getTimestamp();
+        }
         System.out.println(lastSaveTime);
         if (currentTime - lastSaveTime >= SAVE_INTERVAL) {
             mqttDataRepository.save(mqttDataEntity);
-            log.info("设备[{}]数据存储成功，间隔：{}秒", deviceId, (currentTime - lastSaveTime)/1000);
+            log.info("设备[{}]数据存储成功，间隔：{}秒", deviceId, (currentTime - lastSaveTime)/100000000);
         } else {
-            log.info("设备[{}]数据间隔不足1分钟，跳过存储，当前间隔：{}秒",
-                    deviceId, (currentTime - lastSaveTime) / 1000);
+            log.info("设备[{}]数据间隔不足，跳过存储，当前间隔：{}秒",
+                    deviceId, (currentTime - lastSaveTime) / 100000000);
         }
     }
 }

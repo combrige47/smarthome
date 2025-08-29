@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class MqttController {
+    private final MqttMessageSender mqttMessageSender;
 
     @Autowired
-    private MqttMessageSender mqttMessageSender;
+    public MqttController(MqttMessageSender mqttMessageSender) {
+        this.mqttMessageSender = mqttMessageSender;
+    }
 
     @GetMapping("/send")
     @ResponseBody

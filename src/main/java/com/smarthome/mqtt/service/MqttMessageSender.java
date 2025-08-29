@@ -10,15 +10,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class MqttMessageSender {
 
+    private final MessageChannel mqttOutboundChannel;
+
     @Autowired
-    private MessageChannel mqttOutboundChannel;
+    public MqttMessageSender(MessageChannel mqttOutboundChannel) {
+        this.mqttOutboundChannel = mqttOutboundChannel;
+    }
 
     //
     public void sendMessage(String topic, String payload) {
         mqttOutboundChannel.send(MessageBuilder.withPayload(payload)
                 .setHeader("mqtt_topic", topic)
                 .build());
-        log.info("以发送主题"+topic+":"+payload);
+        log.info("以发送主题{}:{}", topic, payload);
     }
 
 }

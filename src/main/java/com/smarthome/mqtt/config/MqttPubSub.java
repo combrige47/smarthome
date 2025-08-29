@@ -1,6 +1,5 @@
 package com.smarthome.mqtt.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smarthome.mqtt.entity.MqttDataEntity;
 import com.smarthome.mqtt.entity.MqttEntity;
 import com.smarthome.mqtt.service.MqttDataService;
@@ -25,18 +24,18 @@ import com.smarthome.mqtt.service.DataCache;
 @Configuration
 public class MqttPubSub {
 
-    @Autowired
-    private MqttPahoClientFactory mqttClientFactory;
-
+    private final MqttPahoClientFactory mqttClientFactory;
 
 
     @Value("${mqtt.topic}")
     private String topic;
+    @Autowired
+    public MqttPubSub(MqttPahoClientFactory mqttClientFactory) {
+        this.mqttClientFactory = mqttClientFactory;
+    }
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
-
-//订阅板子数据的(去连接板子发来的MQTT中的数据：温湿传感器。。。。。。。)
+    //订阅板子数据的
     @Bean
     public MqttPahoMessageDrivenChannelAdapter mqttInbound() {
         MqttPahoMessageDrivenChannelAdapter adapter =
@@ -47,7 +46,7 @@ public class MqttPubSub {
         return adapter;
     }
 
-//获取topic的数据
+    //获取topic的数据
     @Bean
     public IntegrationFlow mqttInFlow(MqttDataService mqttDataService) {
         return IntegrationFlows.from(mqttInbound())
@@ -55,7 +54,7 @@ public class MqttPubSub {
                     String topic = (String) message.getHeaders().get("mqtt_receivedTopic");
                     String payload = (String) message.getPayload();
                     // 打印原始消息
-                    log.info("获取主题"+topic+":"+payload);
+                    log.info("获取主题{}:{}", topic, payload);
                     MqttEntity mqttEntity = new MqttEntity(topic, payload);
                     DataCache.updatedata(mqttEntity);
 

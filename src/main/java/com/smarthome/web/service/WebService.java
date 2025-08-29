@@ -3,23 +3,30 @@ package com.smarthome.web.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smarthome.mqtt.service.DataCache; // 根据实际包路径调整
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service // 标记为 Spring 管理的 Bean
+
+@Service
 public class WebService {
+    private static final Logger logger = LoggerFactory.getLogger(WebService.class);
 
-    @Autowired // 自动注入 DataCache（由 Spring 管理）
-    private DataCache dataCache;
 
-    @Autowired // 自动注入 ObjectMapper（来自 JsonConfig 的 Bean）
-    private ObjectMapper objectMapper;
+    private final DataCache dataCache;
+    private final ObjectMapper objectMapper;
+    @Autowired
+    public WebService(DataCache dataCache, ObjectMapper objectMapper) {
+        this.dataCache = dataCache;
+        this.objectMapper = objectMapper;
+    }
 
     public String getAll() {
         try {
             return objectMapper.writeValueAsString(dataCache.getAlldata());
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return "{}"; // 异常时返回空 JSON
         }
     }
@@ -27,7 +34,7 @@ public class WebService {
         try {
             return objectMapper.writeValueAsString(dataCache.getdata(device));
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage());
             return "{}"; // 异常时返回空 JSON
         }
     }

@@ -28,11 +28,4 @@ public class MqttDataEntity {
         this.timestamp = mqttEntity.getTimestamp();
         this.timestampStr = mqttEntity.getTimestampString();
     }
-
-    public MqttDataEntity(MqttDataEntity mqttDataEntity) {
-        this.deviceId = mqttDataEntity.getDeviceId();
-        this.value = mqttDataEntity.getValue();
-        this.timestamp = mqttDataEntity.getTimestamp();
-        this.timestampStr = mqttDataEntity.getTimestampStr();
-    }
 }

@@ -21,7 +21,7 @@ server:
 
 mqtt:
   broker-url: tcp://127.0.0.1:1883
-  client-id: stm32_zpf
+  client-id: kang
   topic: access_control,bedrom,kitchen,living_room,toilet
   username: admin
   password: a12345678

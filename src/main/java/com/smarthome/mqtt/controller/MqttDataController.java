@@ -16,8 +16,12 @@ import java.util.List;
 @Controller
 @RequestMapping("/history")
 public class MqttDataController {
+    private final MqttDataService mqttDataService;
+
     @Autowired
-    private MqttDataService mqttDataService;
+    public MqttDataController(MqttDataService mqttDataService) {
+        this.mqttDataService = mqttDataService;
+    }
 
     @GetMapping("/")
     @ResponseBody

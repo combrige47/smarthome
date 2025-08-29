@@ -44,10 +44,7 @@ public class MqttConfig {
         return options;
     }
 
-    /**
-     * 工厂模式
-     * @return
-     */
+
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
