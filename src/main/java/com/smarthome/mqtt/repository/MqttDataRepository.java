@@ -9,4 +9,6 @@ public interface MqttDataRepository extends JpaRepository<MqttDataEntity, Long> 
     List<MqttDataEntity> findMqttDataEntitiesByDeviceId(String deviceId);
 
     List<MqttDataEntity> findMqttDataEntitiesByDeviceIdAndTimestamp(String deviceId, Long timestamp);
+
+    MqttDataEntity findTopByDeviceId(String deviceId);
 }
