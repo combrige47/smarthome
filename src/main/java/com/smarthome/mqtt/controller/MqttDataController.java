@@ -1,6 +1,5 @@
 package com.smarthome.mqtt.controller;
 
-
 import com.smarthome.mqtt.entity.MqttDataEntity;
 import com.smarthome.mqtt.service.MqttDataService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
-
 
 @Controller
 @RequestMapping("/history")
@@ -31,14 +29,19 @@ public class MqttDataController {
 
     @GetMapping("/{deciveId}")
     @ResponseBody
-    public List<MqttDataEntity> FindHistoryById(@PathVariable String deciveId) {
+    public List<MqttDataEntity> FindHistoryById(
+            @PathVariable String deciveId) {
         return mqttDataService.findByDeviceId(deciveId);
     }
 
     @GetMapping("/{deviceId}/{time}")
     @ResponseBody
-    public List<MqttDataEntity> FindHistoryByDeviceIdAndTimestamp(@PathVariable String deviceId,@PathVariable("time") Long timestamp) {
+    public List<MqttDataEntity> FindHistoryByDeviceIdAndTimestamp(
+            @PathVariable String deviceId,
+            @PathVariable("time") Long timestamp) {
         return mqttDataService.deleteByDeviceIdAndTimestamp(deviceId,timestamp);
     }
+
+
 
 }

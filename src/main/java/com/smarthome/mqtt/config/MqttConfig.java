@@ -22,11 +22,6 @@ public class MqttConfig {
     @Value("${mqtt.password}")
     private String password;
 
-    /**
-     * 连接MQTT服务器
-     * @return
-     * new Dog();  被执行
-     */
     @Bean
     public MqttConnectOptions mqttConnectOptions() {
         MqttConnectOptions options = new MqttConnectOptions();
@@ -43,7 +38,6 @@ public class MqttConfig {
 
         return options;
     }
-
 
     @Bean
     public MqttPahoClientFactory mqttClientFactory() {

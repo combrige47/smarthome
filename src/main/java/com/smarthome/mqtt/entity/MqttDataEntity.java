@@ -1,7 +1,5 @@
 package com.smarthome.mqtt.entity;
 
-import com.smarthome.mqtt.entity.MqttEntity;
-import com.smarthome.util.TimeUtils;
 import lombok.Data;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -28,4 +26,5 @@ public class MqttDataEntity {
         this.timestamp = mqttEntity.getTimestamp();
         this.timestampStr = mqttEntity.getTimestampString();
     }
+
 }

@@ -1,6 +1,5 @@
 package com.smarthome.security.config;
 
-import com.smarthome.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
