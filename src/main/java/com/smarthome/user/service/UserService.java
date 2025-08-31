@@ -1,7 +1,5 @@
 package com.smarthome.user.service;
 
-import com.smarthome.tools.token.JwtTokenUtil;
-import com.smarthome.tools.result.Result;
 import com.smarthome.user.entity.UserEntity;
 import com.smarthome.user.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.smarthome.tools.result.Result;
+
 @Service
 @Slf4j
 public class UserService {
@@ -25,14 +25,12 @@ public class UserService {
     private final UserRepository UserRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         UserRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
-        this.jwtTokenUtil = jwtTokenUtil;
     }
 
     @Transactional

@@ -32,7 +32,6 @@ public class MqttPubSub {
         this.mqttClientFactory = mqttClientFactory;
     }
 
-
     //订阅板子数据的
     @Bean
     public MqttPahoMessageDrivenChannelAdapter mqttInbound() {
@@ -53,6 +52,7 @@ public class MqttPubSub {
                     String payload = (String) message.getPayload();
                     // 打印原始消息
                     log.info("获取主题{}:{}", topic, payload);
+
                     MqttEntity mqttEntity = new MqttEntity(topic, payload);
                     DataCache.updatedata(mqttEntity);
 
