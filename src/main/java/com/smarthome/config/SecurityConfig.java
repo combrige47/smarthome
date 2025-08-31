@@ -1,4 +1,4 @@
-package com.smarthome.security.config;
+package com.smarthome.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -48,20 +48,11 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(form -> form
-                        .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/getdata", true)
-                        .permitAll()
-                )
                 .rememberMe(remember -> remember
                         .tokenRepository(persistentTokenRepository())
                         .tokenValiditySeconds(60 * 60 * 24 * 7)
                         .userDetailsService(userDetailsService)
                 )
-                .formLogin()
-                .loginPage("/login")  // 这里指定注册页面作为默认跳转页
-                .permitAll()
-                .and()
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login")
@@ -75,7 +66,6 @@ public class SecurityConfig {
     public PersistentTokenRepository persistentTokenRepository() {
         JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
         tokenRepository.setDataSource(dataSource);
-        tokenRepository.setCreateTableOnStartup(false);
         return tokenRepository;
     }
 }

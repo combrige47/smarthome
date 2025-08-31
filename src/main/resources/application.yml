@@ -25,3 +25,8 @@ mqtt:
   topic: access_control,bedrom,kitchen,living_room,toilet
   username: admin
   password: a12345678
+
+jwt:
+  secret: 345462
+  expiration: 3600000
+
