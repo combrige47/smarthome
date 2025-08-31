@@ -1,4 +1,4 @@
-package com.smarthome.mqtt.config;
+package com.smarthome.tools.mqtt.config;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.springframework.beans.factory.annotation.Value;

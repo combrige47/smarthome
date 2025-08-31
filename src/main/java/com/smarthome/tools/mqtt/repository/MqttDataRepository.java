@@ -1,6 +1,6 @@
-package com.smarthome.mqtt.repository;
+package com.smarthome.tools.mqtt.repository;
 
-import com.smarthome.mqtt.entity.MqttDataEntity;
+import com.smarthome.tools.mqtt.entity.MqttDataEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,7 +1,7 @@
-package com.smarthome.mqtt.controller;
+package com.smarthome.tools.mqtt.controller;
 
-import com.smarthome.mqtt.entity.MqttDataEntity;
-import com.smarthome.mqtt.service.MqttDataService;
+import com.smarthome.tools.mqtt.entity.MqttDataEntity;
+import com.smarthome.tools.mqtt.service.MqttDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

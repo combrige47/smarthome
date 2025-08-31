@@ -1,8 +1,8 @@
-package com.smarthome.mqtt.config;
+package com.smarthome.tools.mqtt.config;
 
-import com.smarthome.mqtt.entity.MqttDataEntity;
-import com.smarthome.mqtt.entity.MqttEntity;
-import com.smarthome.mqtt.service.MqttDataService;
+import com.smarthome.tools.mqtt.entity.MqttDataEntity;
+import com.smarthome.tools.mqtt.entity.MqttEntity;
+import com.smarthome.tools.mqtt.service.MqttDataService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,7 @@ import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
-import com.smarthome.mqtt.service.DataCache;
+import com.smarthome.tools.mqtt.service.DataCache;
 
 @Slf4j
 @Configuration

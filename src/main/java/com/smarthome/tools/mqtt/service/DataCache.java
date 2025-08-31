@@ -1,6 +1,6 @@
-package com.smarthome.mqtt.service;
+package com.smarthome.tools.mqtt.service;
 
-import com.smarthome.mqtt.entity.MqttEntity;
+import com.smarthome.tools.mqtt.entity.MqttEntity;
 import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

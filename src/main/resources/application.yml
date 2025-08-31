@@ -25,3 +25,12 @@ mqtt:
   topic: access_control,bedrom,kitchen,living_room,toilet
   username: admin
   password: a12345678
+
+jwt:
+  secret: 345462
+  expiration: 3600000
+Xliat:
+  appid: 0c08f010
+  apiKey: 21d4ab35c18240e5c37c5b7aaa422c21
+  apiSecret: Y2Y2OWRkYjJmZTdmYTY1ZTY3YWU5NzVi
+

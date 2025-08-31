@@ -1,4 +1,4 @@
-package com.smarthome.mqtt.service;
+package com.smarthome.tools.mqtt.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

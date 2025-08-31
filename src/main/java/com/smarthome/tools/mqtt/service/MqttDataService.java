@@ -1,8 +1,8 @@
-package com.smarthome.mqtt.service;
+package com.smarthome.tools.mqtt.service;
 
-import com.smarthome.mqtt.entity.MqttDataEntity;
-import com.smarthome.mqtt.entity.MqttEntity;
-import com.smarthome.mqtt.repository.MqttDataRepository;
+import com.smarthome.tools.mqtt.entity.MqttDataEntity;
+import com.smarthome.tools.mqtt.entity.MqttEntity;
+import com.smarthome.tools.mqtt.repository.MqttDataRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

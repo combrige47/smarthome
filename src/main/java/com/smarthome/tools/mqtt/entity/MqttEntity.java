@@ -1,6 +1,6 @@
-package com.smarthome.mqtt.entity;
+package com.smarthome.tools.mqtt.entity;
 
-import com.smarthome.tools.util.TimeUtils;
+import com.smarthome.tools.time.TimeUtils;
 import lombok.Data;
 
 @Data

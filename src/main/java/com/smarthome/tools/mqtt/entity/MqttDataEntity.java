@@ -1,4 +1,4 @@
-package com.smarthome.mqtt.entity;
+package com.smarthome.tools.mqtt.entity;
 
 import lombok.Data;
 import javax.persistence.Entity;

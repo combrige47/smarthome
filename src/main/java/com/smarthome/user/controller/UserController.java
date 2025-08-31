@@ -19,6 +19,7 @@ public class    UserController {
     }
 
     @PostMapping("/login")
+    @ResponseBody
     public ResponseEntity<Result<String>> login(
             @RequestParam("username") String username,
             @RequestParam("password") String password) {
@@ -26,6 +27,7 @@ public class    UserController {
     }
 
     @PostMapping("/register")
+    @ResponseBody
     public ResponseEntity<String> register(
             @RequestParam String username,
             @RequestParam String password
