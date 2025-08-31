@@ -139,11 +139,20 @@
         </plugins>
     </build>
     <repositories>
-        <!-- 阿里云仓库 -->
         <repository>
             <id>aliyunmaven</id>
             <name>阿里云公共仓库</name>
             <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+        <repository>
+            <id>xfyun-maven-repo</id>
+            <url>https://maven.xfyun.cn/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
     <pluginRepositories>

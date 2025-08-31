@@ -73,8 +73,8 @@ public class WebController {
             // 5. 调用讯飞识别（使用修复后的 XflatRecognizer，传工程内的文件路径）
             XflatRecognizer recognizer = new XflatRecognizer();
             XflatRecognizer.file = tempFile.getAbsolutePath();
-            String recognizeResult = XflatRecognizer.main();
-            sleep(30 * 1000);
+            String recognizeResult = recognizer.startRecognize();
+
             // 6. 返回识别结果
             if (recognizeResult == null || recognizeResult.trim().isEmpty()) {
                 return ResponseEntity.status(500).body("语音识别失败，未获取到有效结果。");
