@@ -20,13 +20,10 @@ public class WebController {
 
     @PostMapping("/send/bedroom")
     public ResponseEntity<String> sendBedroom(
-            @RequestParam int l0,
-            @RequestParam int l1,
-            @RequestParam int l2,
-            @RequestParam int fan,
-            @RequestParam int tv
+            @RequestParam String topic,
+            @RequestParam int value
     ) {
-        webService.sendBedroomData(l0, l1, l2, fan, tv);
+        webService.sendBedroomData(topic, value);
         return ResponseEntity.ok("Bedroom sent");
     }
 

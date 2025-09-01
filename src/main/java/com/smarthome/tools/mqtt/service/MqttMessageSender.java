@@ -17,7 +17,6 @@ public class MqttMessageSender {
         this.mqttOutboundChannel = mqttOutboundChannel;
     }
 
-    //
     public void sendMessage(String topic, String payload) {
         mqttOutboundChannel.send(MessageBuilder.withPayload(payload)
                 .setHeader("mqtt_topic", topic)

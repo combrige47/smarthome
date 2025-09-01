@@ -1,5 +1,7 @@
 package com.smarthome.web.service;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smarthome.tools.ai.XModelService;
@@ -102,14 +104,9 @@ public class WebService {
 
     }
 
-    public String sendBedroomData(int l0,int l1,int l2,int fan,int tv) {
+    public String sendBedroomData(String topic,int value) {
         Map<String, Integer> payloadMap = new HashMap<>();
-        payloadMap.put("l0", l0);
-        payloadMap.put("l1", l1);
-        payloadMap.put("l2", l2);
-        payloadMap.put("fan", fan);
-        payloadMap.put("tv", tv);
-
+        payloadMap.put(topic, value);
         try {
             // 使用 ObjectMapper 将 Map 转换为 JSON 字符串
             String payloadJson = objectMapper.writeValueAsString(payloadMap);
@@ -127,6 +124,14 @@ public class WebService {
     }
 
     public String testAi(String voiceText) {
-        return xModelService.getMqttCommand(voiceText);
+       String jsonData = xModelService.getMqttCommand(voiceText);
+        JSONArray jsonArray = new JSONArray(jsonData);
+        for(Object obj : jsonArray) {
+            JSONObject jsonObject = (JSONObject) obj;
+            String topic = jsonObject.getStr("topic");
+            String payload = jsonObject.getStr("payload");
+            mqttOutboundChannel.sendMessage(topic, payload);
+        }
+        return null;
     }
 }
