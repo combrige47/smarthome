@@ -26,15 +26,25 @@ public class XModelService {
     /**
      * 调用讯飞大模型 API 来获取 MQTT 控制指令。
      *
-     * @param voiceText 用户语音指令，例如 "打开客厅灯"
-     * @param deviceId  设备 ID，例如 "living_room_light_01"
+     * @param voiceText 用户语音指令
      * @return 包含 MQTT 控制命令的 JSON 字符串
      */
-    public String getMqttCommand(String voiceText, String deviceId) {
+    public String getMqttCommand(String voiceText) {
         String userId = "10284711用户"; // 可以根据需要将这个也作为参数传入
         try {
             // 构造完整的 Prompt
-            String prompt = String.format("将用户指令解析为MQTT控制指令。你的输出必须且只能是一个JSON对象，不能包含任何其他文字、解释或代码块，也不能有任何的思考过程，只能够输出JSON格式数据。格式：{\"topic\":\"home/{设备类型}/{设备ID}/control\",\"payload\":\"{\\\"action\\\":\\\"操作\\\"}\"}。示例：指令\"打开客厅灯\" → {\"topic\":\"home/light/living/control\",\"payload\":\"{\\\"action\\\":\\\"on\\\"}\"}。用户指令：%s 设备ID：%s。", voiceText, deviceId == null ? "default" : deviceId);
+            String prompt = String.format(
+                    "请将用户指令解析为MQTT控制指令，严格遵循以下规则：\n" +
+                            "1. 输出必须是纯JSON，无任何多余文字、解释或格式标记（如```）。\n" +
+                            "2. 设备映射：0号灯→l0，1号灯→l1，2号灯→l2，风扇→fan，电视→tv；状态：开启→1，关闭→0。\n" +
+                            "3. 单个指令格式：{\"topic\":\"设备ID\",\"payload\":\"状态值\"}\n" +
+                            "4. 多个指令必须用JSON数组包裹，格式：[{\"topic\":\"l0\",\"payload\":\"1\"},{\"topic\":\"fan\",\"payload\":\"0\"}]\n" +
+                            "5. 若指令无法解析（如设备不存在），输出：{\"error\":\"无法解析指令\"}\n" +
+                            "示例1（单指令）：\n用户说\"打开1号灯\"→{\"topic\":\"l1\",\"payload\":\"1\"}\n" +
+                            "示例2（多指令）：\n用户说\"打开电视和2号灯，关闭风扇\"→[{\"topic\":\"tv\",\"payload\":\"1\"},{\"topic\":\"l2\",\"payload\":\"1\"},{\"topic\":\"fan\",\"payload\":\"0\"}]\n" +
+                            "用户指令：%s",
+                    voiceText
+            );
 
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("user", userId);
@@ -42,14 +52,14 @@ public class XModelService {
 
             JSONArray messagesArray = new JSONArray();
             JSONObject messageObject = new JSONObject();
-            messageObject.put("role", "user"); // 将 role 从 system 改为 user 更符合 API 语义
+            messageObject.put("role", "user ");
             messageObject.put("content", prompt);
             messageObject.put("temperature", "0.5");
 
             messagesArray.put(messageObject);
             jsonObject.put("messages", messagesArray);
             jsonObject.put("stream", false);
-            jsonObject.put("max_tokens", 300);
+            jsonObject.put("max_tokens",5000);
 
             String header = "Bearer " + APIPassword;
 

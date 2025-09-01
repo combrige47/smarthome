@@ -2,6 +2,7 @@ package com.smarthome.web.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smarthome.tools.ai.XModelService;
 import com.smarthome.tools.lat.XflatRecognizer;
 import com.smarthome.tools.mqtt.service.DataCache; // 根据实际包路径调整
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.smarthome.tools.mqtt.service.MqttMessageSender;
 import org.springframework.web.multipart.MultipartFile;
+import com.smarthome.tools.ai.XModelService;
 
 
 import java.io.File;
@@ -25,12 +27,13 @@ import java.util.UUID;
 public class WebService {
     private static final Logger logger = LoggerFactory.getLogger(WebService.class);
     private final MqttMessageSender mqttOutboundChannel;
-
+    private final XModelService xModelService;
     private final DataCache dataCache;
     private final ObjectMapper objectMapper;
     @Autowired
-    public WebService(MqttMessageSender mqttOutboundChannel, DataCache dataCache, ObjectMapper objectMapper) {
+    public WebService(MqttMessageSender mqttOutboundChannel, XModelService xModelService, DataCache dataCache, ObjectMapper objectMapper) {
         this.mqttOutboundChannel = mqttOutboundChannel;
+        this.xModelService = xModelService;
         this.dataCache = dataCache;
         this.objectMapper = objectMapper;
     }
@@ -121,5 +124,9 @@ public class WebService {
             log.error("将卧室数据转换为 JSON 时出错", e);
             return "数据转换失败，请检查参数。";
         }
+    }
+
+    public String testAi(String voiceText) {
+        return xModelService.getMqttCommand(voiceText);
     }
 }

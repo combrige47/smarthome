@@ -1,6 +1,5 @@
 package com.smarthome.web.controller;
 
-import com.smarthome.tools.lat.XflatRecognizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -8,8 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import com.smarthome.web.service.WebService;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 
 
 @Controller
@@ -33,6 +30,7 @@ public class WebController {
         return ResponseEntity.ok("Bedroom sent");
     }
 
+
     @GetMapping("/getdata")
     @ResponseBody
     public String getAll() {return webService.getAll();}
@@ -48,5 +46,11 @@ public class WebController {
         }
 
         return webService.IatRecognizer(audioFile);
+    }
+
+    @PostMapping("/testai")
+    @ResponseBody
+    public String testAi(@RequestParam String voiceText) {
+        return webService.testAi(voiceText);
     }
 }
