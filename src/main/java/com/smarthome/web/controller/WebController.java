@@ -5,8 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import com.smarthome.web.service.WebService;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 
 @Controller
@@ -37,12 +39,14 @@ public class WebController {
     public String getById(@PathVariable String deciveid) {return webService.getById(deciveid);}
 
     @PostMapping("/recognize")
-    public ResponseEntity<String> recognizeAudio(@RequestParam("file") MultipartFile audioFile) {
-        if (audioFile.isEmpty()) {
-            return ResponseEntity.badRequest().body("请上传一个音频文件。");
-        }
+    public void recognizeAudio(@RequestParam("file") MultipartFile audioFile) throws IOException, InterruptedException {
+        webService.IatToLLM(audioFile);
+    }
 
-        return webService.IatRecognizer(audioFile);
+    @PostMapping("/iat")
+    @ResponseBody
+    public String iat(@RequestParam("file") MultipartFile audioFile) throws IOException, InterruptedException {
+        return webService.Iat(audioFile);
     }
 
     @PostMapping("/testai")
