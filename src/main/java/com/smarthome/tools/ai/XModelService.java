@@ -34,14 +34,12 @@ public class XModelService {
         try {
             // 构造完整的 Prompt
             String prompt = String.format(
-                    "请将用户指令解析为MQTT控制指令，严格遵循以下规则：\n" +
-                            "1. 输出必须是纯JSON，无任何多余文字、解释或格式标记（如```）。\n" +
-                            "2. 设备映射：0号灯→l0，1号灯→l1，2号灯→l2，风扇→fan，电视→tv；状态：开启→1，关闭→0。\n" +
-                            "3. 单个指令格式：{\"topic\":\"设备ID\",\"payload\":\"状态值\"}\n" +
-                            "4. 多个指令必须用JSON数组包裹，格式：[{\"topic\":\"l0\",\"payload\":\"1\"},{\"topic\":\"fan\",\"payload\":\"0\"}]\n" +
-                            "5. 若指令无法解析（如设备不存在），输出：{\"error\":\"无法解析指令\"}\n" +
-                            "示例1（单指令）：\n用户说\"打开1号灯\"→{\"topic\":\"l1\",\"payload\":\"1\"}\n" +
-                            "示例2（多指令）：\n用户说\"打开电视和2号灯，关闭风扇\"→[{\"topic\":\"tv\",\"payload\":\"1\"},{\"topic\":\"l2\",\"payload\":\"1\"},{\"topic\":\"fan\",\"payload\":\"0\"}]\n" +
+                    "解析用户指令为MQTT JSON，严格遵守：\n" +
+                            "1. 仅输出JSON（无其他内容）；\n" +
+                            "2. 设备映射：0号灯=light0，1号灯=light1，2号灯=light2，风扇=fan，电视=tv；状态：开启=1，关闭=0；\n" +
+                            "3. 单指令：{\"topic\":\"设备ID\",\"payload\":\"状态\"}；多指令：用JSON数组包裹；\n" +
+                            "4. 设备topic前需要加入bedroom/" +
+                            "示例：\"打开0号灯\"→{\"topic\":\"bedroom/light0\",\"payload\":\"1\"}；\"开电视关风扇\"→[{\"topic\":\"bedroom/tv\",\"payload\":\"1\"},{\"topic\":\"bedroom/fan\",\"payload\":\"0\"}]\n" +
                             "用户指令：%s",
                     voiceText
             );
@@ -52,14 +50,15 @@ public class XModelService {
 
             JSONArray messagesArray = new JSONArray();
             JSONObject messageObject = new JSONObject();
-            messageObject.put("role", "user ");
+            messageObject.put("role", "user");
             messageObject.put("content", prompt);
-            messageObject.put("temperature", "0.5");
+            messageObject.put("temperature", 0.2);
+            messageObject.put("top_k", 2);
 
             messagesArray.put(messageObject);
             jsonObject.put("messages", messagesArray);
             jsonObject.put("stream", false);
-            jsonObject.put("max_tokens",5000);
+            jsonObject.put("max_tokens",1024);
 
             String header = "Bearer " + APIPassword;
 

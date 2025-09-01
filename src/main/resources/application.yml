@@ -22,7 +22,7 @@ server:
 mqtt:
   broker-url: tcp://127.0.0.1:1883
   client-id: kang
-  topic: access_control,bedroom,kitchen,living_room,toilet
+  topic: Toilet,kitchen,access_control,living_room
   username: admin
   password: a12345678
 
