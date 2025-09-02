@@ -5,7 +5,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/smarthome?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: test
+    username: root
     password: 123456
     # JPA 配置
   jpa:
@@ -17,13 +17,24 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect  # MySQL 方言
 
 server:
-  port: 8080
+  port: 8443
+  ssl:
+    key-store: classpath:mykeystore.p12
+    key-store-type: PKCS12
+    key-alias: mycert
+    key-store-password: 123456
+  servlet:
+    session:
+      cookie:
+        http-only: false
+        same-site: none
+        secure: true
 
 mqtt:
-  broker-url: tcp://127.0.0.1:1883
+  broker-url: tcp://8.156.86.179:1883
   #broker-url: tcp://8.156.86.179:1883
   client-id: kang
-  topic: toilet,kitchen,access_control,access_control_cmd,living_room,bedroom,bedroom_cmd,water_pump_1/status,temp_and_hum_1
+  topic: toilet,kitchen,access_control,access_control_cmd,living_room,bedroom,water_pump_1/status,temp_and_hum_1,led_1
   username: jiaju
   password: A12345678
 

@@ -49,6 +49,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("/register")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
@@ -75,8 +76,8 @@ public class SecurityConfig {
         // 允许的源地址，根据实际情况修改
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",  // 前端开发服务器地址
-                "http://localhost:8081",  // 本地服务器地址
-                "https://yourdomain.com"  // 生产环境地址
+                "http://localhost:8081",// 本地服务器地址
+                "http://localhost:8001"
         ));
 
         // 允许的请求方法
@@ -88,7 +89,7 @@ public class SecurityConfig {
         ));
 
         // 允许暴露的响应头
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
 
         // 是否允许携带凭证（如cookies）
         configuration.setAllowCredentials(true);
