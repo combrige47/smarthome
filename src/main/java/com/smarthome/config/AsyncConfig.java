@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 @EnableAsync // 开启异步支持
 public class AsyncConfig {
-    @Bean(name = "mqttSenderPool")
+    @Bean
     public Executor mqttSenderExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5); // 核心线程数

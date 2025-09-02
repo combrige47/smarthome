@@ -15,7 +15,13 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+
 import javax.sql.DataSource;
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -52,16 +58,50 @@ public class SecurityConfig {
                         .tokenRepository(persistentTokenRepository())
                         .tokenValiditySeconds(60 * 60 * 24 * 7)
                         .userDetailsService(userDetailsService)
+                        .rememberMeParameter("remember-me")
+                        .alwaysRemember(false)
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login")
                         .permitAll()
                 );
 
         return http.build();
     }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
 
+        // 允许的源地址，根据实际情况修改
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",  // 前端开发服务器地址
+                "http://localhost:8081",  // 本地服务器地址
+                "https://yourdomain.com"  // 生产环境地址
+        ));
+
+        // 允许的请求方法
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // 允许的请求头
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization", "Content-Type", "X-Requested-With", "remember-me"
+        ));
+
+        // 允许暴露的响应头
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+
+        // 是否允许携带凭证（如cookies）
+        configuration.setAllowCredentials(true);
+
+        // 预检请求的缓存时间（秒）
+        configuration.setMaxAge(3600L);
+
+        // 应用到所有路径
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {
         JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();

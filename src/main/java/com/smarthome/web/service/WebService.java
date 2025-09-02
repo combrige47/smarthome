@@ -78,7 +78,8 @@ public class WebService {
     }
 
     public String testAi(String voiceText) {
-        String jsonData = xModelService.getMqttCommand(voiceText);
+        String jsonOriginData = xModelService.getMqttCommand(voiceText);
+        String jsonData = cleanJsonString(jsonOriginData);
         System.out.println(jsonData);
         JSONArray jsonArray = new JSONArray(jsonData);
         for (Object obj : jsonArray) {
@@ -119,5 +120,24 @@ public class WebService {
     public void IatToLLM(MultipartFile audioFile) throws IOException, InterruptedException {
         String voiceText = Iat(audioFile);
         testAi(voiceText);
+    }
+
+    private String cleanJsonString(String raw) {
+        if (raw == null || raw.trim().isEmpty()) {
+            return "[]";
+        }
+        raw = raw.trim();
+        int start = raw.indexOf('{');
+        if (start == -1) {
+            start = raw.indexOf('[');
+        }
+        int end = raw.lastIndexOf('}');
+        if (end == -1) {
+            end = raw.lastIndexOf(']');
+        }
+        if (start != -1 && end != -1 && start <= end) {
+            return raw.substring(start, end + 1);
+        }
+        return "[]";
     }
 }
