@@ -13,7 +13,7 @@ import java.util.List;
 @Slf4j
 @Service
 public class MqttDataService {
-    private static final long SAVE_INTERVAL = 1000;
+    private static final long SAVE_INTERVAL = 30 * 1000;
     private final MqttDataRepository mqttDataRepository;
 
     @Autowired

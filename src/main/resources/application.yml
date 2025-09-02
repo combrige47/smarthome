@@ -5,8 +5,8 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/smarthome?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-    username: test  # 替换为你的 MySQL 用户名
-    password: 123456 # 替换为你的 MySQL 密码
+    username: root
+    password: 123456
     # JPA 配置
   jpa:
     hibernate:
@@ -20,11 +20,11 @@ server:
   port: 8080
 
 mqtt:
-  broker-url: tcp://127.0.0.1:1883
+  broker-url: tcp://8.156.86.179:1883
   client-id: kang
-  topic: Toilet,kitchen,access_control,living_room
-  username: admin
-  password: a12345678
+  topic: toilet,kitchen,access_control,living_room,bedroom,bedroom_cmd
+  username: jiaju
+  password: A12345678
 
 Xliat:
   appid: 0c08f010

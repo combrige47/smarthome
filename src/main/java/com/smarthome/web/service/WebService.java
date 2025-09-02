@@ -114,27 +114,18 @@ public class WebService {
 
     }
 
-    public String sendBedroomData(String topic, int value) {
-        Map<String, Integer> payloadMap = new HashMap<>();
-        payloadMap.put(topic, value);
+    public String sendBedroomData(String topic, String value) {
         try {
-            // 使用 ObjectMapper 将 Map 转换为 JSON 字符串
-            String payloadJson = objectMapper.writeValueAsString(payloadMap);
-
-            // 调用 sendMessage 方法发送 JSON 字符串
-            mqttOutboundChannel.sendMessage("bedroom_cmd", payloadJson);
-
-            return "数据发送成功：" + payloadJson;
-
-        } catch (JsonProcessingException e) {
-            // 处理 JSON 转换异常
-            log.error("将卧室数据转换为 JSON 时出错", e);
-            return "数据转换失败，请检查参数。";
+           mqttOutboundChannel.sendMessage(topic, value);
+           return  null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
     public String testAi(String voiceText) {
         String jsonData = xModelService.getMqttCommand(voiceText);
+        System.out.println(jsonData);
         JSONArray jsonArray = new JSONArray(jsonData);
         for (Object obj : jsonArray) {
             JSONObject jsonObject = (JSONObject) obj;

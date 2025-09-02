@@ -136,10 +136,4 @@ public class IatClientApp {
         return sb.toString();
     }
 
-    // 保留原main方法用于测试
-    public static void main(String[] args) throws Exception {
-        IatClientApp app = new IatClientApp();
-        String result = app.processAudioSync("D:\\pro\\java\\smarthome\\src\\main\\resources\\16k_10.pcm");
-        System.out.println("Main方法测试结果：" + result);
-    }
 }

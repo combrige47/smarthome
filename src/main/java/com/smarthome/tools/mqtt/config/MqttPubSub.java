@@ -59,7 +59,6 @@ public class MqttPubSub {
                     MqttDataEntity mqttDataEntity = new MqttDataEntity(mqttEntity);
                     try{
                         mqttDataService.save(mqttDataEntity);
-                        log.info("数据已保存到数据库");
                     }catch (Exception e){
                         log.error(e.getMessage());
                     }

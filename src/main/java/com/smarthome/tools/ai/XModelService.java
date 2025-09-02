@@ -34,7 +34,7 @@ public class XModelService {
         try {
             // 构造完整的 Prompt
             String prompt = String.format(
-                    "解析用户指令为MQTT JSON，严格遵守：\n" +
+                    "解析用户指令为JSON，严格遵守：\n" +
                             "1. 仅输出JSON（无其他内容）无类似```json的输出；\n" +
                             "2. 设备映射：0号灯=light0，1号灯=light1，2号灯=light2，风扇=fan，电视=tv；状态：开启=1，关闭=0；\n" +
                             "3. 单指令：{\"topic\":\"设备ID\",\"payload\":\"状态\"}；多指令：用JSON数组包裹；\n" +

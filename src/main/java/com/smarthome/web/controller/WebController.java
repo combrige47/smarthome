@@ -8,7 +8,6 @@ import com.smarthome.web.service.WebService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 
 @Controller
@@ -23,7 +22,7 @@ public class WebController {
     @PostMapping("/send/bedroom")
     public ResponseEntity<String> sendBedroom(
             @RequestParam String topic,
-            @RequestParam int value
+            @RequestParam String value
     ) {
         webService.sendBedroomData(topic, value);
         return ResponseEntity.ok("Bedroom sent");
