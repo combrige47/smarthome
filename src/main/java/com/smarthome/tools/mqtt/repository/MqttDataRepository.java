@@ -6,11 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface MqttDataRepository extends JpaRepository<MqttDataEntity, Long> {
-    List<MqttDataEntity> findMqttDataEntitiesByDeviceId(String deviceId);
+    List<MqttDataEntity> findMqttDataEntitiesByTopic(String deviceId);
 
-    List<MqttDataEntity> findMqttDataEntitiesByDeviceIdAndTimestamp(String deviceId, Long timestamp);
-    
-    MqttDataEntity findTopByDeviceIdOrderByTimestampDesc(String deviceId);
+    List<MqttDataEntity> findMqttDataEntitiesByTopicAndTimestamp(String deviceId, Long timestamp);
 
-    boolean existsByDeviceId(String deviceId);
+    boolean existsByTopic(String deviceId);
+
+    MqttDataEntity findTopByTopicOrderByTimestampDesc(String deviceId);
 }

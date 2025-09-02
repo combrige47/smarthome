@@ -12,7 +12,7 @@ public class DataCache {
 
     // 保存或更新设备数据
     public static void updatedata(MqttEntity data) {
-        MqttEntityMap.put(data.getDeviceId(), data);
+        MqttEntityMap.put(data.getTopic(), data);
     }
 
     // 获取单个设备最新数据

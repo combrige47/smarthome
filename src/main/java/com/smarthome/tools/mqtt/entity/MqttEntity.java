@@ -8,13 +8,13 @@ import lombok.Data;
 
 @Data
 public class MqttEntity {
-    private String deviceId; //设备id
+    private String topic; //设备id
     private JSONObject payload;
     private Long timestamp; // 时间戳
     private String timestampString;
 
     public MqttEntity(String topic, String payload) {
-        this.deviceId = topic;
+        this.topic = topic;
         this.timestamp = System.currentTimeMillis();
         this.timestampString = TimeUtils.formatTimestamp(this.timestamp);
         this.payload = new JSONObject(payload);

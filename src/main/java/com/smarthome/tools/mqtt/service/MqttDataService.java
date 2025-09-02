@@ -34,21 +34,21 @@ public class MqttDataService {
     }
     @Transactional(readOnly = true)
     public List<MqttDataEntity> findByDeviceId(String deviceId) {
-        return mqttDataRepository.findMqttDataEntitiesByDeviceId(deviceId);
+        return mqttDataRepository.findMqttDataEntitiesByTopic(deviceId);
     }
 
     @Transactional
     public List<MqttDataEntity> deleteByDeviceIdAndTimestamp(String deviceId,Long timestamp) {
-        return mqttDataRepository.findMqttDataEntitiesByDeviceIdAndTimestamp(deviceId,timestamp);
+        return mqttDataRepository.findMqttDataEntitiesByTopicAndTimestamp(deviceId,timestamp);
     }
 
     @Transactional
     public void save(MqttDataEntity mqttDataEntity) {
-        String deviceId = mqttDataEntity.getDeviceId();
+        String deviceId = mqttDataEntity.getTopic();
         Long currentTime = System.currentTimeMillis(); // 当前时间戳
         Long lastSaveTime = 0L;
-        if(mqttDataRepository.existsByDeviceId(deviceId)){
-           MqttDataEntity lastEntity = mqttDataRepository.findTopByDeviceIdOrderByTimestampDesc(deviceId);
+        if(mqttDataRepository.existsByTopic(deviceId)){
+           MqttDataEntity lastEntity = mqttDataRepository.findTopByTopicOrderByTimestampDesc(deviceId);
            if(lastEntity != null){
                lastSaveTime = lastEntity.getTimestamp();
            }
