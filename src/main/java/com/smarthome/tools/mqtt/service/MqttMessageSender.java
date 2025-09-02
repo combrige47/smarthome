@@ -19,7 +19,7 @@ public class MqttMessageSender {
     public MqttMessageSender(MessageChannel mqttOutboundChannel) {
         this.mqttOutboundChannel = mqttOutboundChannel;
     }
-    @Async("mqttSenderPool")
+    @Async
     public CompletableFuture<Boolean> sendMessageAsync(String topic, String payload) {
         try {
             boolean result = mqttOutboundChannel.send(MessageBuilder.withPayload(payload)

@@ -1,7 +1,5 @@
 package com.smarthome.web.service;
 
-import cn.hutool.json.JSONArray;
-import cn.hutool.json.JSONObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smarthome.tools.ai.XModelService;
@@ -11,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import com.smarthome.tools.mqtt.service.MqttMessageSender;
 import org.springframework.web.multipart.MultipartFile;
@@ -78,17 +75,10 @@ public class WebService {
     }
 
     public String testAi(String voiceText) {
-        String jsonOriginData = xModelService.getMqttCommand(voiceText);
-        String jsonData = cleanJsonString(jsonOriginData);
-        System.out.println(jsonData);
-        JSONArray jsonArray = new JSONArray(jsonData);
-        for (Object obj : jsonArray) {
-            JSONObject jsonObject = (JSONObject) obj;
-            String topic = jsonObject.getStr("topic");
-            String payload = jsonObject.getStr("payload");
-            // 异步发送，不阻塞循环
-            mqttOutboundChannel.sendMessageAsync(topic, payload);
-        }
+        String payload = xModelService.getMqttCommand(voiceText);
+        System.out.println(payload);
+        String topic = "bedroom_cmd";
+        mqttOutboundChannel.sendMessageAsync(topic, payload);
         return "指令已提交处理";
     }
 
@@ -122,22 +112,4 @@ public class WebService {
         testAi(voiceText);
     }
 
-    private String cleanJsonString(String raw) {
-        if (raw == null || raw.trim().isEmpty()) {
-            return "[]";
-        }
-        raw = raw.trim();
-        int start = raw.indexOf('{');
-        if (start == -1) {
-            start = raw.indexOf('[');
-        }
-        int end = raw.lastIndexOf('}');
-        if (end == -1) {
-            end = raw.lastIndexOf(']');
-        }
-        if (start != -1 && end != -1 && start <= end) {
-            return raw.substring(start, end + 1);
-        }
-        return "[]";
-    }
 }
