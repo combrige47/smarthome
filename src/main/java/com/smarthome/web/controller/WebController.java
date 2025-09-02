@@ -19,12 +19,13 @@ public class WebController {
         this.webService = webService;
     }
 
-    @PostMapping("/send/bedroom")
+
+    @PostMapping("/send")
     public ResponseEntity<String> sendBedroom(
             @RequestParam String topic,
-            @RequestParam String value
+            @RequestParam String payload
     ) {
-        webService.sendBedroomData(topic, value);
+        webService.sendData(topic, payload);
         return ResponseEntity.ok("Bedroom sent");
     }
 

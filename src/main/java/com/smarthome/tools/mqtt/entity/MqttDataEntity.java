@@ -13,7 +13,7 @@ public class MqttDataEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 主键，自增
     private String deviceId; //设备id
-    private String value;   //值
+    private String payload;   //值
     private Long timestamp;
     private String timestampStr;
 
@@ -22,7 +22,7 @@ public class MqttDataEntity {
 
     public MqttDataEntity(MqttEntity mqttEntity) {
         this.deviceId = mqttEntity.getDeviceId();
-        this.value = mqttEntity.getValue();
+        this.payload = mqttEntity.getPayload();
         this.timestamp = mqttEntity.getTimestamp();
         this.timestampStr = mqttEntity.getTimestampString();
     }

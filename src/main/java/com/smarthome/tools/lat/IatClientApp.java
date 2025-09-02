@@ -100,7 +100,7 @@ public class IatClientApp {
         try {
             File file = new File(audioFilePath);
             IAT_CLIENT.send(file, listener);
-            latch.await(60, TimeUnit.SECONDS); // 等待识别完成或超时
+            latch.await(15, TimeUnit.SECONDS); // 等待识别完成或超时
         } catch (FileNotFoundException e) {
             logger.error("文件未找到：{}", audioFilePath, e);
             return "音频文件不存在";

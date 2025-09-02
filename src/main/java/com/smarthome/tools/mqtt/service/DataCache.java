@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class DataCache {
-    // 存储设备最新数据：key=设备ID，value=设备数据
+    // 存储设备最新数据：key=设备ID，payload=设备数据
     private static final Map<String, MqttEntity> MqttEntityMap = new ConcurrentHashMap<>();
 
     // 保存或更新设备数据
