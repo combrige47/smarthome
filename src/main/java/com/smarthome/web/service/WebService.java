@@ -79,6 +79,7 @@ public class WebService {
 
     public String testAi(String voiceText) {
         String jsonData = xModelService.getMqttCommand(voiceText);
+        System.out.println(jsonData);
         JSONArray jsonArray = new JSONArray(jsonData);
         for (Object obj : jsonArray) {
             JSONObject jsonObject = (JSONObject) obj;
