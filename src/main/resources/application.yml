@@ -36,7 +36,7 @@ mqtt:
   broker-url: tcp://8.156.86.179:1883
   #broker-url: tcp://8.156.86.179:1883
   client-id: kang
-  topic: toilet,kitchen,access_control,access_control_cmd,living_room,bedroom,water_pump_1/status,temp_and_hum_1,led_1
+  topic: toilet,kitchen,access_control,access_control_cmd,living_room,bedroom,water_pump_1_status,temp_and_hum_1,led_1_status,shower_room_status
   username: jiaju
   password: A12345678
 

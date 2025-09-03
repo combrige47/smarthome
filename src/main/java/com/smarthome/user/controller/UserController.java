@@ -47,8 +47,8 @@ public class    UserController {
             @RequestParam String password
     ) {
         try {
-            UserEntity user = userService.register(username, password);
-            return ResponseEntity.ok("注册成功，用户名：" + user.getUsername());
+            userService.register(username, password);
+            return ResponseEntity.ok("注册成功");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
