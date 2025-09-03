@@ -18,6 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.smarthome.tools.result.Result;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 @Service
 @Slf4j
 public class UserService {
@@ -27,7 +31,7 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, HttpServletResponse response, HttpSession session) {
         UserRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
@@ -46,17 +50,41 @@ public class UserService {
         return UserRepository.save(user);
     }
 
-    public ResponseEntity<Result<String>> login(String username, String password) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
+    public String login(String username, String password, boolean rememberMe,
+                                    HttpServletResponse response, HttpSession session) {
+        // 1. 执行身份验证
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            //String token = jwtTokenUtil.generateToken(username);
-            return ResponseEntity.ok(Result.success("登录成功"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Result.fail("用户名或密码错误"));
-        }
+        // 2. 根据"记住我"设置有效期（秒）
+        int maxAge = rememberMe ? 604800 : 3600; // 7天/1小时
+
+        // 3. 设置Session超时（与Cookie保持一致）
+        session.setMaxInactiveInterval(maxAge);
+
+        // 4. 创建并配置Cookie
+        Cookie sessionCookie = createSessionCookie(session.getId(), maxAge);
+
+        // 5. 写入Cookie到响应
+        response.addCookie(sessionCookie);
+
+        return "登录成功";
+    }
+
+    /**
+     * 封装Cookie创建逻辑（单一职责，便于维护）
+     * @param sessionId 会话ID
+     * @param maxAge 有效期（秒）
+     * @return 配置好的Cookie对象
+     */
+    private Cookie createSessionCookie(String sessionId, int maxAge) {
+        Cookie cookie = new Cookie("JSESSIONID", sessionId);
+        cookie.setPath("/"); // 全站生效
+        cookie.setMaxAge(maxAge); // 有效期
+        cookie.setSecure(true); // 仅HTTPS传输（与配置文件一致）
+        cookie.setHttpOnly(false); // 允许前端访问（按配置文件设置）
+        return cookie;
     }
 }

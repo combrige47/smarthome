@@ -8,6 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 
 @Controller
 public class    UserController {
@@ -18,12 +21,23 @@ public class    UserController {
         this.userService = userService;
     }
 
+
     @PostMapping("/login")
     @ResponseBody
     public ResponseEntity<Result<String>> login(
-            @RequestParam("username") String username,
-            @RequestParam("password") String password) {
-            return userService.login(username, password);
+            @RequestParam String username,
+            @RequestParam String password,
+            @RequestParam(required = false, defaultValue = "false") boolean rememberMe,
+            HttpServletResponse response,
+            HttpSession session) {
+
+        try {
+            // 调用服务层方法，传入必要参数，隐藏实现细节
+            String message = userService.login(username, password, rememberMe, response, session);
+            return ResponseEntity.ok(Result.success(String.valueOf(message)));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Result.fail("用户名或密码错误"));
+        }
     }
 
     @PostMapping("/register")
