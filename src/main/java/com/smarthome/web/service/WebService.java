@@ -78,7 +78,7 @@ public class WebService {
 
     public String testAi(String voiceText) throws UnsupportedEncodingException {
         System.out.println(voiceText);
-        String payload = xModelService.getMqttCommand(voiceText);
+        String payload = xModelService.processAiRequest(voiceText);
         System.out.println(payload);
         String topic = "bedroom_cmd";
         mqttOutboundChannel.sendMessageAsync(topic, payload);

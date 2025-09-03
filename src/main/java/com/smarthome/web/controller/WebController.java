@@ -27,7 +27,7 @@ public class WebController {
      * @return
      */
     @PostMapping("/send")
-    public ResponseEntity<String> sendBedroom(
+    public ResponseEntity<String> send(
             @RequestParam String topic,
             @RequestParam String payload
     ) {
