@@ -8,6 +8,7 @@ import com.smarthome.web.service.WebService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 
 @Controller
@@ -82,7 +83,7 @@ public class WebController {
      */
     @PostMapping("/testai")
     @ResponseBody
-    public String testAi(@RequestParam String voiceText) {
+    public String testAi(@RequestParam String voiceText) throws UnsupportedEncodingException {
         return webService.testAi(voiceText);
     }
 }

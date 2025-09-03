@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets; // 引入标准字符集类
 
 /**
  * 封装对讯飞大模型 API 的调用逻辑。
@@ -22,86 +23,132 @@ public class XModelService {
     private String APIPassword;
 
     private static final String API_URL = "https://spark-api-open.xf-yun.com/v2/chat/completions";
+    // 明确指定 UTF-8 字符集，避免依赖系统默认编码
+    private static final String CHARSET = StandardCharsets.UTF_8.name();
 
     /**
      * 调用讯飞大模型 API 来获取 MQTT 控制指令。
      *
-     * @param voiceText 用户语音指令
-     * @return 包含 MQTT 控制命令的 JSON 字符串
+     * @param voiceText 用户语音指令（需确保已完成 URL 解码）
+     * @return 标准设备控制指令（如 "f1,l10"），而非 JSON 字符串
      */
     public String getMqttCommand(String voiceText) {
-        String userId = "10284711用户"; // 可以根据需要将这个也作为参数传入
+        String userId = "10284711用户"; // 建议改为配置项，如 @Value("${ai.user.id}")
         try {
-            // 构造完整的 Prompt
+            // 1. 优化提示词：中英双语对照，强化中文指令匹配，去除歧义
             String prompt = String.format(
-                    "已知设备编码与开关规则：0 号灯 = l0、1 号灯 = l1、2 号灯 = l2、风扇 = f、电视 = TV；开关状态用 1 表示开，0 表示关；多设备指令需用英文逗号拼接（如‘打开 1 号灯、开风扇’对应指令‘l11,f1’,电视用on和off来表示）。\n" +
-                            "最后只能给出对应的指令，避免使用任何中文标点或特殊符号,请先根据此规则完成示例转换：\n" +
-                            "\n" +
-                            "示例 1：打开 0 号灯、关闭风扇 → l01,f0\n" +
-                            "示例 2：关闭 2 号灯、打开电视 → l20,TVon\n" +
-                            "后续我会给出自然语言操作需求（如‘打开所有灯、关闭电视’），请参照上述规则和示例格式，将其转换为标准指令字符串。"+
-                            "用户指令：%s",voiceText
+                    "【核心指令】：仅将用户的中文设备操作需求转换为标准指令字符串，不输出任何解释、分析或多余符号（包括逗号结尾）。\n" +
+                            "【设备编码规则】：\n" +
+                            "1. 设备映射：0号灯=l0、1号灯=l1、2号灯=l2、风扇=f、电视=TV；\n" +
+                            "2. 状态映射：开=1、关=0（电视特殊：开=on、关=off）；\n" +
+                            "3. 格式要求：多设备指令用英文逗号分隔，仅保留字母（小写）、数字、英文逗号，无其他字符。\n" +
+                            "【正确示例】：\n" +
+                            "示例1：打开0号灯、关闭风扇 → l01,f0\n" +
+                            "示例2：关闭2号灯、打开电视 → l20,TVon\n" +
+                            "示例3：打开风扇、关闭1号灯 → f1,l10\n" + // 新增与你的测试指令匹配的示例
+                            "【错误示例】：\n" +
+                            "错误1：输出 \"f1,l10,\"（末尾多逗号）；错误2：输出 \"打开风扇→f1\"（含中文）；错误3：仅输出 \"l10\"（遗漏设备）\n" +
+                            "用户指令：%s",
+                    voiceText
             );
 
+            // 2. 构造请求JSON：修复参数位置（temperature/top_k 应在 messages 外，符合讯飞API规范）
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("user", userId);
             jsonObject.put("model", "x1");
+            // 核心参数：temperature/top_k 是全局配置，不能放在 message 内部
+            jsonObject.put("temperature", 0.2); // 降低随机性，确保指令稳定
+            jsonObject.put("top_k", 2);
+            jsonObject.put("stream", false);
+            jsonObject.put("max_tokens", 50); // 缩减最大token，避免多余输出
 
+            // 构造 messages 数组（讯飞API要求 role 为 "user" 或 "assistant"，message 内仅含 role/content）
             JSONArray messagesArray = new JSONArray();
             JSONObject messageObject = new JSONObject();
             messageObject.put("role", "user");
-            messageObject.put("content", prompt);
-            messageObject.put("temperature", 0.2);
-            messageObject.put("top_k", 2);
-
+            messageObject.put("content", prompt); // 仅传入 prompt，无其他冗余参数
             messagesArray.put(messageObject);
             jsonObject.put("messages", messagesArray);
-            jsonObject.put("stream", false);
-            jsonObject.put("max_tokens",1024);
 
+            // 打印请求体（方便调试，生产环境可注释）
+            System.out.println("讯飞API请求体：" + jsonObject.toString());
+
+            // 3. 发送HTTP请求：强制UTF-8编码，避免乱码
             String header = "Bearer " + APIPassword;
-
             URL obj = new URL(API_URL);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
             con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
+            // 关键：Content-Type 明确指定 UTF-8，告诉服务器请求体编码
+            con.setRequestProperty("Content-Type", "application/json; charset=" + CHARSET);
+            // 明确告诉服务器响应使用 UTF-8 编码
+            con.setRequestProperty("Accept", "application/json; charset=" + CHARSET);
+            con.setRequestProperty("Accept-Charset", CHARSET);
             con.setRequestProperty("Authorization", header);
             con.setDoOutput(true);
 
+            // 写入请求体：用 UTF-8 编码字节数组
             try (OutputStream os = con.getOutputStream()) {
-                os.write(jsonObject.toString().getBytes());
+                byte[] requestBodyBytes = jsonObject.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(requestBodyBytes);
                 os.flush();
             }
 
+            // 4. 接收响应：用 UTF-8 解码，避免乱码
             int responseCode = con.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
-                // 如果响应不成功，抛出异常
-                throw new RuntimeException("HTTP Response Code: " + responseCode);
+                // 读取错误响应（方便排查API报错原因）
+                String errorResponse = readErrorResponse(con);
+                throw new RuntimeException("讯飞API请求失败，响应码：" + responseCode + "，错误信息：" + errorResponse);
             }
 
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()))) {
+            // 读取成功响应，强制 UTF-8 解码
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
                 String inputLine;
-                StringBuilder response = new StringBuilder();
+                StringBuilder responseSb = new StringBuilder();
                 while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
+                    responseSb.append(inputLine);
                 }
+                String fullResponse = responseSb.toString();
+                System.out.println("讯飞API响应体：" + fullResponse);
 
-                // 解析 API 返回的 JSON 响应，提取核心的 content
-                JSONObject fullResponse = new JSONObject(response.toString());
-                JSONArray choices = fullResponse.getJSONArray("choices");
-
+                // 5. 解析响应：提取 content 并清理多余字符
+                JSONObject fullRespJson = new JSONObject(fullResponse);
+                JSONArray choices = fullRespJson.getJSONArray("choices");
                 if (choices != null && !choices.isEmpty()) {
                     JSONObject firstChoice = choices.getJSONObject(0);
-                    JSONObject message = firstChoice.getJSONObject("message");
-                    System.out.println(message);
-                    return message.getStr("content");
+                    JSONObject messageResp = firstChoice.getJSONObject("message");
+                    if (messageResp != null && messageResp.containsKey("content")) {
+                        // 清理可能的空格、换行、末尾逗号
+                        String command = messageResp.getStr("content")
+                                .trim() // 去除前后空格
+                                .replaceAll(",$", ""); // 去除末尾多余的逗号
+                        System.out.println("最终设备控制指令：" + command);
+                        return command; // 直接返回指令（如 "f1,l10"），无需包装JSON
+                    }
                 }
+                return "error: 未提取到指令";
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // 在实际项目中，应返回更友好的错误信息
-            return "{\"error\":\"" + e.getMessage() + "\"}";
+            return "error: " + e.getMessage().replaceAll("\"", "'"); // 避免JSON转义问题
         }
-        return "{\"error\":\"未知错误\"}";
+    }
+
+    /**
+     * 读取HTTP错误响应（如401/403/500），辅助排查问题
+     */
+    private String readErrorResponse(HttpURLConnection con) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(con.getErrorStream(), StandardCharsets.UTF_8))) {
+            String line;
+            StringBuilder sb = new StringBuilder();
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return "读取错误响应失败：" + e.getMessage();
+        }
     }
 }

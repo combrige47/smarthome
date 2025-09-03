@@ -16,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.UUID;
 
 
@@ -74,12 +76,13 @@ public class WebService {
         }
     }
 
-    public String testAi(String voiceText) {
+    public String testAi(String voiceText) throws UnsupportedEncodingException {
+        System.out.println(voiceText);
         String payload = xModelService.getMqttCommand(voiceText);
         System.out.println(payload);
         String topic = "bedroom_cmd";
         mqttOutboundChannel.sendMessageAsync(topic, payload);
-        return "指令已提交处理";
+        return String.format("指令%s已提交", payload);
     }
 
     public String Iat(MultipartFile audioFile) throws IOException, InterruptedException {
