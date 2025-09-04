@@ -73,10 +73,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 允许的源地址，根据实际情况修改
+        // 允许的源地址
         configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:3000",  // 前端开发服务器地址
-                "http://localhost:8081",// 本地服务器地址
+                "http://localhost:3000",
+                "http://localhost:8081",
                 "http://localhost:8001"
         ));
 
