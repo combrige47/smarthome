@@ -3,6 +3,8 @@ package com.smarthome.user.controller;
 import com.smarthome.tools.result.Result;
 import com.smarthome.user.entity.UserEntity;
 import com.smarthome.user.service.UserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpSession;
 
 
 @Controller
+@Api(tags = "用户接口")
 public class    UserController {
 
     private final UserService userService;
@@ -23,6 +26,7 @@ public class    UserController {
 
 
     @PostMapping("/login")
+    @ApiOperation("用户登陆")
     @ResponseBody
     public ResponseEntity<Result<String>> login(
             @RequestParam String username,
@@ -41,6 +45,7 @@ public class    UserController {
     }
 
     @PostMapping("/register")
+    @ApiOperation("用户注册")
     @ResponseBody
     public ResponseEntity<String> register(
             @RequestParam String username,

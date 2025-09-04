@@ -1,5 +1,7 @@
 package com.smarthome.web.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -12,6 +14,7 @@ import java.io.UnsupportedEncodingException;
 
 
 @Controller
+@Api(tags = "服务接口")
 public class WebController {
 
     private final WebService webService;
@@ -27,12 +30,13 @@ public class WebController {
      * @return
      */
     @PostMapping("/send")
+    @ApiOperation("向对应主题发送消息")
     public ResponseEntity<String> send(
             @RequestParam String topic,
             @RequestParam String payload
     ) {
-        webService.sendData(topic, payload);
-        return ResponseEntity.ok("Bedroom sent");
+        String sendmsg = webService.sendData(topic, payload);
+        return ResponseEntity.ok(sendmsg);
     }
 
     /**
@@ -40,6 +44,7 @@ public class WebController {
      * @return
      */
     @GetMapping("/getdata")
+    @ApiOperation("获取当前所有主题和对应消息")
     @ResponseBody
     public String getAll() {return webService.getAll();}
 
@@ -49,19 +54,10 @@ public class WebController {
      * @return
      */
     @GetMapping("/getdata/{deciveid}")
+    @ApiOperation("获取当前对应主题的消息")
     @ResponseBody
     public String getById(@PathVariable String deciveid) {return webService.getById(deciveid);}
 
-    /**
-     *
-     * @param audioFile
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    @PostMapping("/recognize")
-    public void recognizeAudio(@RequestParam("file") MultipartFile audioFile) throws IOException, InterruptedException {
-        webService.IatToLLM(audioFile);
-    }
 
     /**
      * 返回语音转文字的内容
@@ -71,6 +67,7 @@ public class WebController {
      * @throws InterruptedException
      */
     @PostMapping("/iat")
+    @ApiOperation("将语音转换为文字")
     @ResponseBody
     public String iat(@RequestParam("file") MultipartFile audioFile) throws IOException, InterruptedException {
         return webService.Iat(audioFile);
@@ -82,6 +79,7 @@ public class WebController {
      * @return
      */
     @PostMapping("/testai")
+    @ApiOperation("ai处理语音识别后的文本")
     @ResponseBody
     public String testAi(@RequestParam String voiceText) throws UnsupportedEncodingException {
         return webService.testAi(voiceText);

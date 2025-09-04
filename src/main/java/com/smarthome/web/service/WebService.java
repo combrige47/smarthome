@@ -77,12 +77,7 @@ public class WebService {
     }
 
     public String testAi(String voiceText) throws UnsupportedEncodingException {
-        System.out.println(voiceText);
-        String payload = xModelService.processAiRequest(voiceText);
-        System.out.println(payload);
-        String topic = "bedroom_cmd";
-        mqttOutboundChannel.sendMessageAsync(topic, payload);
-        return String.format("指令%s已提交", payload);
+        return xModelService.processAiRequest(voiceText);
     }
 
     public String Iat(MultipartFile audioFile) throws IOException, InterruptedException {
@@ -107,12 +102,9 @@ public class WebService {
         System.out.println("音频文件将保存到：" + tempFilePath);
         audioFile.transferTo(tempFile);
         System.out.println("音频文件保存成功：" + tempFilePath);
-        return iatClientApp.processAudioSync(tempFilePath);
-    }
-
-    public void IatToLLM(MultipartFile audioFile) throws IOException, InterruptedException {
-        String voiceText = Iat(audioFile);
-        testAi(voiceText);
+        String res = iatClientApp.processAudioSync(tempFilePath);
+        tempFile.delete();
+        return res;
     }
 
 }

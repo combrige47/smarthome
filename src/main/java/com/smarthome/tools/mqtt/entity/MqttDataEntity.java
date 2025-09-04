@@ -15,7 +15,7 @@ public class MqttDataEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; // 主键，自增
-    private String topic; //设备id
+    private String topic;
     @Type(type = "json")
     @Column(columnDefinition = "json")
     private JSONObject payload;   //值

@@ -6,6 +6,7 @@ import com.smarthome.tools.mqtt.entity.MqttEntity;
 import com.smarthome.tools.mqtt.repository.MqttDataRepository;
 import com.smarthome.tools.mqtt.service.DataCache;
 import com.smarthome.tools.mqtt.service.MqttMessageSender;
+import com.vladmihalcea.hibernate.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -79,12 +81,14 @@ public class XModelService {
                         "【关键设备信息（必须参考）】：\n" +
                         "- 设备编码（对应topic）：卧室=bedroom、卫生间=toilet、厨房=kitchen、门禁系统=access_control、客厅=living_room、淋浴间=shower_room_status；\n" +
                         "- 各设备可操作/查询字段：\n" +
-                        "  ① 卧室（bedroom）：l0（0号灯）、l1（1号灯）、l2（2号灯）、fan（风扇）、tv（电视）；\n" +
-                        "  ② 卫生间（toilet）：toilet_state（使用状态）、light_state（灯光）、fan_state（排风扇）；\n" +
-                        "  ③ 厨房（kitchen）：alarmbell（燃气报警器）、gas（燃气浓度）、fan_status（厨房风扇）；\n" +
-                        "  ④ 客厅（living_room）：fire_alarm（火灾报警器）、fire_state（火灾状态）、temp（温度）、hum（湿度）；\n" +
-                        "  ⑤ 淋浴间（shower_room_status）：pump_level（水泵档位）、status（运行状态）；\n" +
-                        "  ⑥ 门禁系统（access_control）：isHuman（人体检测）、isCall（呼叫状态）、owner（主人模式）；\n" +
+                        "  卧室（bedroom）：l0（0号灯）、l1（1号灯）、l2（2号灯）、fan（风扇）、tv（电视）；\n" +
+                        "  卫生间（toilet）：toilet_state（使用状态）、light_state（灯光）、fan_state（排风扇）；\n" +
+                        "  厨房（kitchen）：alarmbell（燃气报警器）、gas（燃气浓度）、fan_status（厨房风扇）；\n" +
+                        "  客厅（living_room）：fire_alarm（火灾报警器）、fire_state（火灾状态）、temp（温度）、hum（湿度）；\n" +
+                        "  淋浴间（shower_room_status）：pump_level（水泵档位）、status（运行状态）；\n" +
+                        "  门禁系统（access_control）：isHuman（人体检测）、isCall（呼叫状态）、owner（主人模式）；\n" +
+                        "  大灯(led_1_status) :  state(状态)、level(亮度)；\n"+
+                        "  水泵状态(water_pump_1_status) :  pump_level(水泵强度)、mode(水泵模式)、moisture(湿度)\n"+
                         "【输出格式要求（必须严格遵守）】：\n" +
                         "格式1：数据查询→\"数据查询|{\"target\":\"查询目标\",\"deviceCode\":\"设备编码\",\"field\":\"查询字段（可选）\"}\"\n" +
                         "格式2：设备控制→\"设备控制|{\"content\":\"原用户指令\",\"deviceCode\":\"设备编码\",\"field\":\"操作字段\",\"action\":\"操作（开/关/调档位等）\"}\"\n" +
@@ -190,7 +194,7 @@ public class XModelService {
             Map<String, MqttEntity> allDeviceMap = mqttdata.getAlldata();
             MqttEntity targetDevice = allDeviceMap.get(deviceCode);
             if (targetDevice == null) {
-                return "未找到编码为“" + deviceCode + "”的设备（支持的设备：bedroom、toilet、kitchen、access_control、living_room、shower_room_status）";
+                return "暂无“" + deviceCode + "”的数据";
             }
             // 解析该设备的所有字段
             return parseDeviceStatusByTopic(deviceCode, targetDevice);
@@ -207,7 +211,7 @@ public class XModelService {
             JSONObject payload = targetDevice.getPayload();
             String devName = getDeviceNameByTopic(deviceCode); // 从设备编码获取中文名称
             String updateTime = targetDevice.getTimestampString();
-            StringBuilder result = new StringBuilder(devName + "（编码：" + deviceCode + "）的指定字段状态：\n");
+            StringBuilder result = new StringBuilder(devName +"的状态：\n");
 
             // 处理多字段（用逗号分割）
             String[] fields = field.split(",");
@@ -281,6 +285,31 @@ public class XModelService {
                     case "status": return convertShowerStatus(payload.getStr(field, "unknown"));
                     default: return "未知字段（" + field + "）";
                 }
+            case "led_1_status":
+                switch (field) {
+                    case "state":
+                        return convertLightFanStatus(payload.getInt(field, -1)); // 复用灯光状态转换
+                    case "level":
+                        int brightness = payload.getInt(field, -1);
+                        return brightness == -1 ? "未知" : brightness + "（1-100）";
+                    default:
+                        return "未知字段（" + field + "）";
+                }
+
+                // 新增：灌溉水泵（water_pump_1_status）的字段解析
+            case "water_pump_1_status":
+                switch (field) {
+                    case "pump_level":
+                        int level = payload.getInt(field, -1);
+                        return level == -1 ? "未知" : level + " 档（1-3）";
+                    case "mode":
+                        return convertPumpMode(payload.getStr(field, "unknown")); // 调用新增的模式转换方法
+                    case "moisture":
+                        int humidity = payload.getInt(field, -1);
+                        return humidity == -1 ? "未知" : humidity + " %";
+                    default:
+                        return "未知字段（" + field + "）";
+                }
             default:
                 return "未知设备，无法解析字段";
         }
@@ -292,14 +321,57 @@ public class XModelService {
     private String handleDeviceControl(String voiceText) throws Exception {
         // 原有的设备控制指令生成逻辑
         String prompt = String.format(
-                "【核心指令】：仅将用户设备操作需求转为标准指令，无多余内容。\n" +
-                        "【编码规则】：\n" +
-                        "1. 设备映射：0号灯=l0、1号灯=l1、2号灯=l2、风扇=f、电视=TV；\n" +
-                        "2. 状态映射：开=1、关=0（电视：开=on、关=off）；\n" +
-                        "3. 格式：多设备用英文逗号分隔，仅保留字母、数字、英文逗号。\n" +
-                        "4. 正确示例：打开风扇,关闭电视:f1,TVoff\n"+
-                        "打开1号和2号灯:l11,l21"+
-                "用户指令：%s",
+                "【核心指令】：仅将用户设备操作需求转为「设备主题|标准指令」格式，无任何多余内容（无解释、无备注）。\n" +
+                        "【前置规则】：\n" +
+                        "1. 先识别用户操作的「目标设备」，匹配唯一对应的「MQTT主题」；\n" +
+                        "2. 再根据设备类型，按规则生成「标准指令（payload）」；\n" +
+                        "3. 最终输出格式：「设备主题|标准指令」（仅这一项内容，无其他字符）。\n" +
+                        "\n" +
+                        "【设备-主题-指令规则映射表】（必须严格遵守，不允许自定义）：\n" +
+                        "1. 卧室设备（如卧室灯、风扇、电视）\n" +
+                        "   - 对应主题：bedroom_cmd\n" +
+                        "   - 设备映射：0号灯=l0、1号灯=l1、2号灯=l2、风扇=f、电视=TV\n" +
+                        "   - 状态映射：开=1、关=0（电视特殊：开=on、关=off）\n" +
+                        "   - 多设备操作：用英文逗号分隔（如操作多个设备，指令间用逗号拼接）\n" +
+                        "\n" +
+                        "2. 浴室水泵（shower_room）\n" +
+                        "   - 对应主题：shower_room\n" +
+                        "   - 操作类型：仅「调节挡位」\n" +
+                        "   - 指令规则：直接输出数字0-3（0=关闭，1-3=对应挡位，必须在0-3范围内）\n" +
+                        "\n" +
+                        "3. 大灯（led_1）\n" +
+                        "   - 对应主题：led_1\n" +
+                        "   - 操作类型：仅「调节亮度」\n" +
+                        "   - 指令规则：直接输出数字1-100（1=最低亮度，100=最高亮度，必须在1-100范围内）\n" +
+                        "\n" +
+                        "4. 灌溉水泵（water_pump_1）\n" +
+                        "   - 对应主题：water_pump_1\n" +
+                        "   - 操作类型：「模式切换」或「手动调挡」\n" +
+                        "   - 指令规则：\n" +
+                        "     - 切换自动模式：输出auto\n" +
+                        "     - 切换手动模式：输出manual\n" +
+                        "     - 手动模式下调挡：输出数字（如1、2、3，数字必须在1-3范围内）\n" +
+                        "\n" +
+                        "【正确示例】（必须参考格式，不允许偏离）：\n" +
+                        "1. 用户说「打开卧室1号灯，关闭卧室电视」→ bedroom_cmd|l11,TVoff\n" +
+                        "2. 用户说「把浴室水泵调到2档」→ shower_room|2\n" +
+                        "3. 用户说「大灯亮度调到75」→ led_1|75\n" +
+                        "4. 用户说「灌溉水泵切换手动模式」→ water_pump_1|manual\n" +
+                        "5. 用户说「灌溉水泵切自动」→ water_pump_1|auto\n" +
+                        "6. 用户说「卧室风扇开，浴室水泵关」→ 分两次输出（按设备主题拆分，每次1个主题）：\n" +
+                        "   bedroom_cmd|f1\n" +
+                        "   shower_room|0\n" +
+                        "7. 用户说「灌溉水泵调到2档」要先切换至手动模式 →\n"+
+                        "   water_pump_1|manual\n"+
+                        "   water_pump_1|2\n"+
+                        "\n" +
+                        "【错误禁止】：\n" +
+                        "1. 禁止省略主题（如仅输出「2」，必须带「shower_room_cmd|」）；\n" +
+                        "2. 禁止指令超范围（如浴室水泵不能输出4，大灯不能输出0）；\n" +
+                        "3. 禁止多主题混输（如同一行输出「bedroom_cmd|l11,shower_room_cmd|2」，需拆分两行）；\n" +
+                        "4. 禁止多余字符（如「shower_room_cmd|2档」，不能带「档」字）；\n" +
+                        "\n" +
+                        "用户指令：%s",
                 voiceText
         );
 
@@ -318,12 +390,29 @@ public class XModelService {
         userMsg.put("content", prompt);
         messages.add(userMsg);
         aiReqJson.put("messages", messages);
-
-        // 调用 AI 并获取指令
         HttpURLConnection connection = createAiHttpConnection(aiReqJson.toString());
         String aiResponse = readAiResponse(connection);
-        // 清理指令（去除末尾逗号、空格）
-        return aiResponse.trim().replaceAll(",$", "");
+        // 调用 AI 并获取指令
+        String[] cmdLines = aiResponse.trim().split("\\n");
+        List<String> successCmds = new ArrayList<>(); // 记录成功发送的指令，用于返回结果
+
+        // 遍历每一行指令，解析主题和payload
+        for (String cmdLine : cmdLines) {
+            cmdLine = cmdLine.trim();
+            // 跳过空行或格式错误的行（容错处理）
+            if (StringUtils.isBlank(cmdLine) || !cmdLine.contains("|")) {
+                continue;
+            }
+
+            // 按 "|" 拆分主题和指令（最多拆分为2部分，避免payload含"|"的异常）
+            String[] topicAndPayload = cmdLine.split("\\|", 2);
+            String topic = topicAndPayload[0].trim();
+            String payload = topicAndPayload[1].trim();
+            mqttPublishService.sendMessageAsync(topic, payload);
+            successCmds.add(topic + ":" + payload); // 记录成功指令
+
+        }
+        return "已成功发送以下指令：\n" + String.join("\n", successCmds);
     }
 
     // ------------------------------ 工具方法：HTTP 请求与响应处理 ------------------------------
@@ -424,9 +513,9 @@ public class XModelService {
         String devName = getDeviceNameByTopic(topic); // 设备中文名称
         String updateTime = entity.getTimestampString(); // 更新时间
 
-        // 按topic分支解析（一一对应你的设备格式）
+        // 按设备编码（topic）分支解析，确保每种设备有独立的格式化逻辑
         return switch (topic) {
-            // 1. 卧室：bedroom {"l0":0,"l1":0,"l2":1,"fan":0,"tv":1}
+            // 1. 卧室设备：bedroom {"l0":0,"l1":0,"l2":1,"fan":0,"tv":1}
             case "bedroom" -> String.format(
                     "%s（编码：%s）：\n" +
                             "  - 0号灯状态：%s\n" +
@@ -444,7 +533,7 @@ public class XModelService {
                     updateTime
             );
 
-            // 2. 卫生间：toilet{"toilet_state":0,"light_state":0,"fan_state":1}
+            // 2. 卫生间设备：toilet {"toilet_state":0,"light_state":0,"fan_state":1}
             case "toilet" -> String.format(
                     "%s（编码：%s）：\n" +
                             "  - 卫生间使用状态：%s\n" +
@@ -458,7 +547,7 @@ public class XModelService {
                     updateTime
             );
 
-            // 3. 厨房：kitchen{"alarmbell":0,"gas":475,"fan_status":0}
+            // 3. 厨房设备：kitchen {"alarmbell":0,"gas":475,"fan_status":0}
             case "kitchen" -> String.format(
                     "%s（编码：%s）：\n" +
                             "  - 燃气报警器状态：%s\n" +
@@ -472,7 +561,7 @@ public class XModelService {
                     updateTime
             );
 
-            // 4. 门禁：access_control{"isHuman":0,"isCall":0,"owner":1}
+            // 4. 门禁系统：access_control {"isHuman":0,"isCall":0,"owner":1}
             case "access_control" -> String.format(
                     "%s（编码：%s）：\n" +
                             "  - 人体检测：%s\n" +
@@ -486,7 +575,7 @@ public class XModelService {
                     updateTime
             );
 
-            // 5. 客厅：living_room{"fire_alarm":0,"fire_state":0,"temp":33.20,"hum":0.00}
+            // 5. 客厅设备：living_room {"fire_alarm":0,"fire_state":0,"temp":33.20,"hum":0.00}
             case "living_room" -> String.format(
                     "%s（编码：%s）：\n" +
                             "  - 火灾报警器状态：%s\n" +
@@ -502,7 +591,7 @@ public class XModelService {
                     updateTime
             );
 
-            // 6. 淋浴间：shower_room_status{"pump_level": 0, "status": "active"}
+            // 6. 淋浴间设备：shower_room_status {"pump_level": 0, "status": "active"}
             case "shower_room_status" -> String.format(
                     "%s（编码：%s）：\n" +
                             "  - 运行状态：%s\n" +
@@ -514,7 +603,33 @@ public class XModelService {
                     updateTime
             );
 
-            // 未知设备（防新增设备未适配）
+            // 7. 大灯设备：led_1_status {"state":1, "level":75}
+            case "led_1_status" -> String.format(
+                    "%s（编码：%s）：\n" +
+                            "  - 运行状态：%s\n" +
+                            "  - 亮度：%s（1-100）\n" +
+                            "  更新时间：%s",
+                    devName, topic,
+                    convertLightFanStatus(payload.getInt("state", -1)), // 复用灯光状态转换（0=关，1=开）
+                    payload.getInt("level", -1) == -1 ? "未知" : payload.getInt("level", -1),
+                    updateTime
+            );
+
+            // 8. 灌溉水泵设备：water_pump_1_status {"pump_level":2, "mode":"auto", "moisture":65}
+            case "water_pump_1_status" -> String.format(
+                    "%s（编码：%s）：\n" +
+                            "  - 水泵强度：%s 档（1-3）\n" +
+                            "  - 运行模式：%s\n" +
+                            "  - 当前湿度：%s %%\n" +
+                            "  更新时间：%s",
+                    devName, topic,
+                    payload.getInt("pump_level", -1) == -1 ? "未知" : payload.getInt("pump_level", -1),
+                    convertPumpMode(payload.getStr("mode", "unknown")), // 新增水泵模式转换
+                    payload.getInt("moisture", -1) == -1 ? "未知" : payload.getInt("moisture", -1),
+                    updateTime
+            );
+
+            // 未知设备（防新增设备未适配的情况）
             default -> String.format(
                     "未知设备（编码：%s）：\n" +
                             "  原始数据：%s\n" +
@@ -523,6 +638,16 @@ public class XModelService {
             );
         };
     }
+
+    // 新增：水泵模式状态转换（补充配套方法）
+    private String convertPumpMode(String mode) {
+        return switch (mode.trim().toLowerCase()) {
+            case "auto" -> "自动模式";
+            case "manual" -> "手动模式";
+            default -> "未知模式（" + mode + "）";
+        };
+    }
+
 
     // ------------------------------ 辅助方法：设备名称/状态转换（一一对应你的数据） ------------------------------
     /**
@@ -536,6 +661,8 @@ public class XModelService {
             case "access_control" -> "门禁系统";
             case "living_room" -> "客厅";
             case "shower_room_status" -> "淋浴间";
+            case "led_1_status" -> "大灯";
+            case "water_pump_1_status" -> "水泵";
             default -> "未知设备";
         };
     }
@@ -580,6 +707,14 @@ public class XModelService {
         return switch (status) {
             case 0 -> "正常（无报警）";
             case 1 -> "报警（异常）";
+            default -> "未知";
+        };
+    }
+
+    private String convertLedStatus(int status){
+        return switch (status){
+            case 0 -> "关闭状态";
+            case 1 -> "正常运行";
             default -> "未知";
         };
     }
@@ -638,6 +773,9 @@ public class XModelService {
             default -> "未知（" + status + "）";
         };
     }
+
+
+
     private String getFieldDisplayName(String deviceCode, String field) {
         switch (deviceCode) {
             case "bedroom":
@@ -672,6 +810,26 @@ public class XModelService {
                     case "fire_state" -> "火灾检测状态";
                     default -> field;
                 };
+                case "shower_room_status":
+                    return switch (field){
+                        case "pump_level" -> "水泵等级";
+                        case "status" -> "状态";
+                        default -> field;
+                    };
+                    case "led_1_status":
+                        return switch (field){
+                            case "state" -> "状态";
+                            case "level" ->"亮度";
+                            default -> field;
+                        };
+                        case "water_pump_1_status":
+                            return switch (field){
+                                case "pump_level" -> "水泵强度";
+                                case "mode" -> "水泵模式";
+                                case "moisture" -> "湿度";
+                                default -> field;
+                            };
+
             // 省略其他设备的映射...
             default:
                 return field;
